@@ -49,8 +49,8 @@ ansi2html = "^1.9.2"
 [project.optional-dependencies]
 gui = ["pyside6", "pyqtdarktheme-fork"]
 
-[tool.poetry.group.dev]
-optional = true
+[tool.poetry.extras]
+gui = ["pyside6", "pyqtdarktheme-fork"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"

@@ -1182,8 +1182,9 @@ description = "Python compiler with full language support and CPython compatibil
 optional = false
 python-versions = "*"
 groups = ["dev"]
-files = []
-develop = false
+files = [
+    {file = "Nuitka-2.8.4.tar.gz", hash = "sha256:06b020ef33be97194f888dcfcd4c69c8452ceb61b31c7622e610d5156eb7923d"},
+]
 
 [package.dependencies]
 ordered-set = ">=4.1.0"
@@ -1191,10 +1192,10 @@ zstandard = ">=0.15"
 
 [package.extras]
 all = ["imageio", "setuptools (>=42)", "toml", "zstandard (>=0.15)"]
+app = ["zstandard (>=0.15)"]
 build-wheel = ["setuptools (>=42)", "toml", "wheel"]
 icon-conversion = ["imageio"]
 onefile = ["zstandard (>=0.15)"]
-
 
 [[package]]
 name = "ordered-set"
@@ -2355,4 +2356,4 @@ gui = ["pyqtdarktheme-fork", "pyside6"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<3.14"
-content-hash = "42e20ba5076884901dd344855e5bb95a810b2c31edbb3f5fde9c4c8661958f9b"
+content-hash = "8a5a54e51625b6a162f48853245eed64c3a2603353b1dfd624254f4bb237a0b0"
