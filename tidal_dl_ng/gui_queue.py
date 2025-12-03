@@ -82,18 +82,23 @@ class GuiQueueManager:
     def on_queue_download_clear_all(self) -> None:
         """Clear all items from the download queue."""
         self.on_clear_queue_download(
-            f"({QueueDownloadStatus.Waiting}|{QueueDownloadStatus.Finished}|{QueueDownloadStatus.Failed}|{QueueDownloadStatus.Skipped})"
+            f"({QueueDownloadStatus.Waiting}|{QueueDownloadStatus.Finished}|{QueueDownloadStatus.Failed})"
         )
 
     def on_queue_download_clear_finished(self) -> None:
         """Clear finished items from the download queue."""
-        self.on_clear_queue_download(f"({QueueDownloadStatus.Finished}|{QueueDownloadStatus.Skipped})")
+        self.on_clear_queue_download(f"[{QueueDownloadStatus.Finished}]")
 
     def on_clear_queue_download(self, regex: str) -> None:
-        """Clear items from the download queue matching the given regex."""
-        items = self.main_window.tr_queue_download.findItems(
+        """Clear items from the download queue matching the given regex.
+
+        Args:
+            regex (str): Regular expression to match items.
+        """
+        items: list[QtWidgets.QTreeWidgetItem | None] = self.main_window.tr_queue_download.findItems(
             regex, QtCore.Qt.MatchFlag.MatchRegularExpression, column=0
         )
+
         for item in items:
             self.main_window.tr_queue_download.takeTopLevelItem(
                 self.main_window.tr_queue_download.indexOfTopLevelItem(item)
@@ -101,12 +106,14 @@ class GuiQueueManager:
 
     def on_queue_download_remove(self) -> None:
         """Remove selected items from the download queue."""
-        items = self.main_window.tr_queue_download.selectedItems()
-        if not items:
+        items: list[QtWidgets.QTreeWidgetItem | None] = self.main_window.tr_queue_download.selectedItems()
+
+        if len(items) == 0:
             logger_gui.error("Please select an item from the queue first.")
         else:
             for item in items:
                 status: str = item.text(0)
+
                 if status != QueueDownloadStatus.Downloading:
                     self.main_window.tr_queue_download.takeTopLevelItem(
                         self.main_window.tr_queue_download.indexOfTopLevelItem(item)
@@ -115,8 +122,12 @@ class GuiQueueManager:
                     logger_gui.info("Cannot remove a currently downloading item from queue.")
 
     def on_pb_queue_download_toggle(self) -> None:
-        """Toggle download status (pause / resume) accordingly."""
+        """Toggle download status (pause / resume) accordingly.
+
+        :return: None
+        """
         handling_app: HandlingApp = HandlingApp()
+
         if handling_app.event_run.is_set():
             self.pb_queue_download_pause()
         else:
@@ -125,7 +136,9 @@ class GuiQueueManager:
     def pb_queue_download_run(self) -> None:
         """Start the download queue and update the button state."""
         handling_app: HandlingApp = HandlingApp()
+
         handling_app.event_run.set()
+
         icon = QtGui.QIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.MediaPlaybackPause))
         self.main_window.pb_queue_download_toggle.setIcon(icon)
         self.main_window.pb_queue_download_toggle.setStyleSheet("background-color: #e0a800; color: #212529")
@@ -133,7 +146,9 @@ class GuiQueueManager:
     def pb_queue_download_pause(self) -> None:
         """Pause the download queue and update the button state."""
         handling_app: HandlingApp = HandlingApp()
+
         handling_app.event_run.clear()
+
         icon = QtGui.QIcon(QtGui.QIcon.fromTheme(QtGui.QIcon.ThemeIcon.MediaPlaybackStart))
         self.main_window.pb_queue_download_toggle.setIcon(icon)
         self.main_window.pb_queue_download_toggle.setStyleSheet("background-color: #218838; color: #fff")

@@ -147,6 +147,162 @@ QGroupBox::title {
     padding: 4px 8px;
     background-color: #3a3a3a;
     border-radius: 4px;
+}
+
+QComboBox {
+    background-color: #2b2b2b;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: #e0e0e0;
+    min-height: 20px;
+}
+
+QComboBox:hover {
+    border: 1px solid #4a4a4a;
+    background-color: #333333;
+}
+
+QComboBox:focus {
+    border: 1px solid #3d5a80;
+}
+
+QComboBox::drop-down {
+    border: none;
+    width: 20px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #2b2b2b !important;
+    border: 1px solid #3d3d3d !important;
+    selection-background-color: #3d5a80;
+    selection-color: white;
+    color: #e0e0e0;
+    outline: none;
+}
+
+QComboBox QAbstractItemView * {
+    background-color: #2b2b2b !important;
+    color: #e0e0e0 !important;
+}
+
+QComboBox QAbstractItemView::item {
+    padding: 4px 8px;
+    min-height: 20px;
+    background-color: transparent;
+}
+
+QComboBox QAbstractItemView::item:hover {
+    background-color: #3a3a3a !important;
+}
+
+QComboBox QAbstractItemView::item:selected {
+    background-color: #3d5a80 !important;
+    color: white !important;
+}
+
+QLineEdit {
+    background-color: #2b2b2b;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: #e0e0e0;
+}
+
+QLineEdit:hover {
+    border: 1px solid #4a4a4a;
+}
+
+QLineEdit:focus {
+    border: 1px solid #3d5a80;
+}
+
+QSpinBox {
+    background-color: #2b2b2b;
+    border: 1px solid #3d3d3d;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: #e0e0e0;
+}
+
+QSpinBox:hover {
+    border: 1px solid #4a4a4a;
+}
+
+QSpinBox:focus {
+    border: 1px solid #3d5a80;
+}
+
+QSpinBox::up-button, QSpinBox::down-button {
+    background-color: #3a3a3a;
+    border: none;
+    width: 16px;
+}
+
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+    background-color: #4a4a4a;
+}
+
+QSpinBox::up-arrow {
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 5px solid #e0e0e0;
+}
+
+QSpinBox::down-arrow {
+    image: none;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #e0e0e0;
+}
+
+QCheckBox {
+    color: #e0e0e0;
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border: 1px solid #3d3d3d;
+    border-radius: 3px;
+    background-color: #2b2b2b;
+}
+
+QCheckBox::indicator:hover {
+    border: 1px solid #4a4a4a;
+    background-color: #333333;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #3d5a80;
+    border: 1px solid #3d5a80;
+}
+
+QCheckBox::indicator:checked:hover {
+    background-color: #4a6a9a;
+    border: 1px solid #4a6a9a;
+}
+
+QPushButton {
+    background-color: #3a3a3a;
+    border: 1px solid #4a4a4a;
+    border-radius: 4px;
+    padding: 4px 12px;
+    color: #e0e0e0;
+}
+
+QPushButton:hover {
+    background-color: #4a4a4a;
+}
+
+QPushButton:pressed {
+    background-color: #2a2a2a;
+}
+
+QLabel {
+    color: #e0e0e0;
 }</string>
          </property>
          <property name="frameShape">
@@ -159,7 +315,7 @@ QGroupBox::title {
           <number>1</number>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="page_flags">
           <layout class="QVBoxLayout" name="lv_page_flags">
@@ -463,7 +619,11 @@ QGroupBox::title {
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="c_quality_audio"/>
+                 <widget class="QComboBox" name="c_quality_audio">
+                  <property name="placeholderText">
+                   <string>text</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -496,7 +656,11 @@ QGroupBox::title {
                  </widget>
                 </item>
                 <item>
-                 <widget class="QComboBox" name="c_quality_video"/>
+                 <widget class="QComboBox" name="c_quality_video">
+                  <property name="placeholderText">
+                   <string>text</string>
+                  </property>
+                 </widget>
                 </item>
                </layout>
               </item>
@@ -538,6 +702,9 @@ QGroupBox::title {
                     <horstretch>10</horstretch>
                     <verstretch>0</verstretch>
                    </sizepolicy>
+                  </property>
+                  <property name="placeholderText">
+                   <string>text</string>
                   </property>
                  </widget>
                 </item>

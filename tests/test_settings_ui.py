@@ -59,7 +59,7 @@ class TestUiDialogSettings:
 
         assert ui.sw_categories is not None
         assert isinstance(ui.sw_categories, QtWidgets.QStackedWidget)
-        assert ui.sw_categories.count() == 4
+        assert ui.sw_categories.count() == 5
 
     def test_ui_flags_page_widgets(self, qapp):
         """Test that the Flags page contains all expected checkboxes."""
@@ -232,11 +232,12 @@ class TestDialogPreferencesCategories:
             dialog = DialogPreferences(mock_settings, settings_save)
 
             # Check that all categories were added
-            assert dialog.ui.lw_categories.count() == 4
+            assert dialog.ui.lw_categories.count() == 5
             assert dialog.ui.lw_categories.item(0).text() == "Flags"
             assert dialog.ui.lw_categories.item(1).text() == "Quality"
             assert dialog.ui.lw_categories.item(2).text() == "Numbers"
             assert dialog.ui.lw_categories.item(3).text() == "Paths & Formats"
+            assert dialog.ui.lw_categories.item(4).text() == "Delimiters"
 
     @patch.object(DialogPreferences, "exec")
     def test_init_categories_sets_first_selected(self, mock_exec, mock_settings, qapp):
@@ -359,13 +360,13 @@ class TestDialogPreferencesIntegration:
             assert isinstance(dialog.ui, Ui_DialogSettings)
 
             # Check categories list is populated
-            assert dialog.ui.lw_categories.count() == 4
+            assert dialog.ui.lw_categories.count() == 5
 
-            # Check stacked widget has 4 pages
-            assert dialog.ui.sw_categories.count() == 4
+            # Check stacked widget has 5 pages
+            assert dialog.ui.sw_categories.count() == 5
 
             # Check all pages are accessible
-            for i in range(4):
+            for i in range(5):
                 page = dialog.ui.sw_categories.widget(i)
                 assert page is not None
 

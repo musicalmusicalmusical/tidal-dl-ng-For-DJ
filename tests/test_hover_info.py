@@ -249,7 +249,8 @@ class TestInfoTabWidget:
             info_tab_widget._populate_track_details(mock_track)
             qt_app.processEvents()
 
-            assert info_tab_widget.lbl_title.text() == "Bohemian Rhapsody"
+            # The title is now a clickable link
+            assert "Bohemian Rhapsody" in info_tab_widget.lbl_title.text()
             assert info_tab_widget.lbl_version.text() == "2011 Remaster"
             assert info_tab_widget.lbl_duration.text() == "05:54"
             assert info_tab_widget.lbl_bpm.text() == "⏳ Loading..."
@@ -266,7 +267,8 @@ class TestInfoTabWidget:
             info_tab_widget._populate_video_details(mock_video)
             qt_app.processEvents()
 
-            assert info_tab_widget.lbl_title.text() == "Thriller"
+            # The title is now a clickable link
+            assert "Thriller" in info_tab_widget.lbl_title.text()
             assert info_tab_widget.lbl_codec.text() == "1080p"
 
     def test_clear_display(self, info_tab_widget, qt_app):

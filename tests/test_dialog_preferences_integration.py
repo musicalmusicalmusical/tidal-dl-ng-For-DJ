@@ -90,11 +90,15 @@ class TestDialogPreferencesInitialization:
         dialog = DialogPreferences(mock_settings, settings_save)
 
         # Check categories count
-        assert dialog.ui.lw_categories.count() == 4
+        assert dialog.ui.lw_categories.count() == 5
 
         # Check categories text
-        categories = [dialog.ui.lw_categories.item(i).text() for i in range(4)]
-        assert categories == ["Flags", "Quality", "Numbers", "Paths & Formats"]
+        categories = [dialog.ui.lw_categories.item(i).text() for i in range(5)]
+        assert "Flags" in categories
+        assert "Quality" in categories
+        assert "Numbers" in categories
+        assert "Paths & Formats" in categories
+        assert "Delimiters" in categories
 
     @patch.object(DialogPreferences, "exec")
     @patch.object(DialogPreferences, "gui_populate")

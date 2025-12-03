@@ -35,8 +35,8 @@ class TestSettingsDialogStructure:
         ui = Ui_DialogSettings()
         ui.setupUi(dialog)
 
-        # We expect 4 categories/pages
-        expected_categories = ["Flags", "Quality", "Numbers", "Paths & Formats"]
+        # We expect 5 categories/pages
+        expected_categories = ["Flags", "Quality", "Numbers", "Paths & Formats", "Delimiters"]
         assert ui.sw_categories.count() == len(expected_categories)
 
     def test_all_pages_have_layouts(self, qapp):
