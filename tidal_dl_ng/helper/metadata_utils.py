@@ -14,10 +14,10 @@ def _convert_list_to_str(value: list | tuple) -> str:
 
 def _convert_dict_to_str(value: dict) -> str:
     """Extract meaningful string from dict."""
-    if "name" in value and value["name"]:
+    if value.get("name"):
         return str(value["name"])
     for k in ("label", "title", "genre", "name"):
-        if k in value and value[k]:
+        if value.get(k):
             return str(value[k])
     with suppress(Exception):
         vals = [str(v) for v in value.values() if v is not None]
@@ -177,7 +177,7 @@ def _extract_name_from_item(item: object) -> str | None:
     if isinstance(item, dict):
         # Try common name keys
         for k in ("name", "artist", "person"):
-            if k in item and item[k]:
+            if item.get(k):
                 return str(item[k])
         return None
     # Try object attributes

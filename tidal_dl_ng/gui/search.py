@@ -31,7 +31,7 @@ class GuiSearchManager:
 
     def __init__(self, main_window: "MainWindow"):
         """Initialize the search manager."""
-        self.main_window: "MainWindow" = main_window
+        self.main_window: MainWindow = main_window
 
     def search_populate_results(self, query: str, type_media: Any) -> None:
         """Populate the results tree with search results."""

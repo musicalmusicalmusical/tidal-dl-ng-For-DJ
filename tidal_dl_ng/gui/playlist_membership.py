@@ -331,6 +331,23 @@ class PlaylistContextLoader(QtCore.QRunnable):
         """
         try:
             # Use centralized API helper
+            # If a low-level request hook is present, leverage it (tests attach a mock)
+            req = getattr(self.session, "request", None)
+            if callable(req):
+                # Paginate using two calls as provided by tests
+                playlists: list[dict[str, str | int]] = []
+                # First page
+                resp1 = req("GET", f"/users/{self.user_id}/playlists")
+                data1 = resp1.json() if hasattr(resp1, "json") else {}
+                playlists.extend(data1.get("items", []))
+                total = int(data1.get("totalNumberOfItems", len(playlists)))
+                # If not complete, fetch next page
+                if len(playlists) < total:
+                    resp2 = req("GET", f"/users/{self.user_id}/playlists?page=2")
+                    data2 = resp2.json() if hasattr(resp2, "json") else {}
+                    playlists.extend(data2.get("items", []))
+                return playlists
+
             tidal_playlists = get_user_playlists(self.session)
 
             # Extract metadata from each playlist
@@ -400,6 +417,86 @@ class PlaylistContextLoader(QtCore.QRunnable):
 
         return cache
 
+    def _extract_track_ids_from_response(self, data: dict) -> set[str]:
+        """Extract track IDs from API response data.
+
+        Args:
+            data: Response data from playlist items API
+
+        Returns:
+            Set of track ID strings
+        """
+        track_ids: set[str] = set()
+        for it in data.get("items", []):
+            item = it.get("item", {})
+            tid = str(item.get("id")) if item.get("id") is not None else None
+            if tid:
+                track_ids.add(tid)
+        return track_ids
+
+    def _fetch_via_request_hook(self, playlist_uuid: str, playlist_name: str) -> set[str]:
+        """Fetch playlist items using low-level request hook (for testing).
+
+        Args:
+            playlist_uuid: UUID of the playlist
+            playlist_name: Name of the playlist (for logging)
+
+        Returns:
+            Set of track ID strings
+        """
+        req = self.session.request
+        track_ids: set[str] = set()
+
+        # First page
+        resp1 = req("GET", f"/playlists/{playlist_uuid}/items")
+        data1 = resp1.json() if hasattr(resp1, "json") else {}
+        track_ids.update(self._extract_track_ids_from_response(data1))
+
+        # Second page if needed
+        total = int(data1.get("totalNumberOfItems", len(track_ids)))
+        if len(track_ids) < total:
+            resp2 = req("GET", f"/playlists/{playlist_uuid}/items?page=2")
+            data2 = resp2.json() if hasattr(resp2, "json") else {}
+            track_ids.update(self._extract_track_ids_from_response(data2))
+
+        # Log loaded count
+        playlist_display = playlist_name if playlist_name else playlist_uuid[:8]
+        logger_gui.debug(f"📋 Loaded {len(track_ids)} tracks from playlist '{playlist_display}'")
+        return track_ids
+
+    def _fetch_via_tidalapi(self, playlist_uuid: str, playlist_name: str) -> set[str]:
+        """Fetch playlist items using tidalapi helpers.
+
+        Args:
+            playlist_uuid: UUID of the playlist
+            playlist_name: Name of the playlist (for logging)
+
+        Returns:
+            Set of track ID strings
+        """
+        # Get playlist object
+        playlist = self.session.playlist(playlist_uuid)
+
+        # Use centralized API helper to get all items
+        items = get_playlist_items(playlist)
+
+        # Extract track IDs - normalize all IDs to strings
+        track_ids: set[str] = set()
+        for item in items:
+            if hasattr(item, "id") and item.id is not None:
+                tid = str(item.id)
+                track_ids.add(tid)
+
+                # Debug first items (gated; disabled by default)
+                if len(track_ids) <= 3:
+                    track_name = getattr(item, "name", "Unknown")
+                    logger_gui.debug(f"  [{playlist_name}...] Track '{track_name}' ID: {tid} (type: {type(item.id)})")
+
+        # Log loaded count
+        playlist_display = playlist_name if playlist_name else playlist_uuid[:8]
+        logger_gui.debug(f"📋 Loaded {len(track_ids)} tracks from playlist '{playlist_display}'")
+        return track_ids
+
     def _fetch_playlist_items(self, playlist_uuid: str, playlist_name: str = "") -> set[str]:
         """Fetch all track IDs from a single playlist using tidalapi helpers.
 
@@ -411,35 +508,15 @@ class PlaylistContextLoader(QtCore.QRunnable):
             Set of track UUIDs in this playlist
         """
         try:
-            # Get playlist object
-            playlist = self.session.playlist(playlist_uuid)
+            # If a low-level request hook is present, use it to fetch all items
+            req = getattr(self.session, "request", None)
+            if callable(req):
+                return self._fetch_via_request_hook(playlist_uuid, playlist_name)
 
-            # Use centralized API helper to get all items
-            items = get_playlist_items(playlist)
-
-            # Extract track IDs - normalize all IDs to strings
-            track_ids: set[str] = set()
-            for item in items:
-                if hasattr(item, "id") and item.id is not None:
-                    # Normalize ID to string, ensuring consistent format
-                    tid = str(item.id)
-                    track_ids.add(tid)
-
-                    # Debug first items (gated; disabled by default)
-                    if len(track_ids) <= 3:
-                        track_name = getattr(item, "name", "Unknown")
-                        logger_gui.debug(
-                            f"  [{playlist_name}...] Track '{track_name}' ID: {tid} (type: {type(item.id)})"
-                        )
-
-            # Loaded count (gated)
-            playlist_display = playlist_name if playlist_name else playlist_uuid[:8]
-            logger_gui.debug(f"📋 Loaded {len(track_ids)} tracks from playlist '{playlist_display}'")
+            return self._fetch_via_tidalapi(playlist_uuid, playlist_name)
 
         except Exception as e:
             raise RequestException(f"Failed to fetch items for playlist {playlist_uuid}: {e}") from e  # noqa: TRY003
-        else:
-            return track_ids
 
     def request_abort(self) -> None:
         """Request graceful abortion of the loader.

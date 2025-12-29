@@ -17,7 +17,6 @@ from tidalapi import Session, Track
 from tidal_dl_ng.gui.playlist_membership import ThreadSafePlaylistCache
 from tidal_dl_ng.helper.playlist_api import add_track_to_playlist, remove_track_from_playlist
 from tidal_dl_ng.logger import logger_gui
-from tidal_dl_ng.ui.dialog_playlist_manager import Ui_DialogPlaylistManager
 from tidal_dl_ng.worker import Worker
 
 
@@ -77,6 +76,9 @@ class PlaylistManagerDialog(QtWidgets.QDialog):
         self._original_states: dict[str, bool] = {}
         self._pending_tasks: dict[str, Worker] = {}
 
+        # Import the generated UI here to avoid circular dependency and ensure availability
+        from tidal_dl_ng.ui.dialog_playlist_manager import Ui_DialogPlaylistManager
+
         # Use compiled .ui
         self.ui = Ui_DialogPlaylistManager()
         self.ui.setupUi(self)
@@ -89,6 +91,9 @@ class PlaylistManagerDialog(QtWidgets.QDialog):
 
         # Populate playlists list into verticalLayoutList
         self._populate_playlists_ui()
+
+        # Expose container layout for tests
+        self.container_layout = self.ui.verticalLayoutList
 
     def _populate_playlists_ui(self) -> None:
         """Populate dialog with user playlists from cache.
@@ -325,3 +330,19 @@ class PlaylistManagerDialog(QtWidgets.QDialog):
         # Cancel pending tasks (Worker doesn't have built-in abort, but we can clean up references)
         self._pending_tasks.clear()
         super().closeEvent(event)
+
+
+# Attach implementation class to the generated UI module for import compatibility
+try:
+    import sys
+
+    import tidal_dl_ng.ui.dialog_playlist_manager as _ui_mod
+
+    _ui_mod.PlaylistManagerDialog = PlaylistManagerDialog
+    # Ensure module is in sys.modules for proper imports
+    sys.modules["tidal_dl_ng.ui.dialog_playlist_manager"] = _ui_mod
+except Exception as e:
+    # If UI module isn't importable in some contexts, log and continue
+    from tidal_dl_ng.logger import logger_gui
+
+    logger_gui.debug(f"Could not attach PlaylistManagerDialog to UI module: {e}")

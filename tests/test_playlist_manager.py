@@ -456,7 +456,15 @@ class TestPlaylistManagerDialog(unittest.TestCase):
             threadpool=self.threadpool,
         )
 
-        # Mock successful API response
+        # Mock playlist object for add_track_to_playlist
+        mock_playlist = Mock()
+        mock_playlist.id = "playlist_2"
+        mock_playlist.add = Mock()
+
+        # Mock session.playlist() to return our mock playlist
+        self.mock_session.playlist.return_value = mock_playlist
+
+        # Mock session.request for the test hook in add_track_to_playlist
         mock_response = Mock()
         mock_response.raise_for_status = Mock()
         self.mock_session.request.return_value = mock_response
@@ -473,6 +481,10 @@ class TestPlaylistManagerDialog(unittest.TestCase):
         # Checkbox should be re-enabled
         mock_checkbox.setEnabled.assert_called_with(True)
 
+        # Verify API was called
+        self.mock_session.playlist.assert_called_once_with("playlist_2")
+        self.mock_session.request.assert_called_once_with("POST", "/playlists/playlist_2/tracks")
+
     def test_api_add_track_error_rollback(self) -> None:
         """Test rollback on add failure."""
         dialog = PlaylistManagerDialog(
@@ -481,6 +493,11 @@ class TestPlaylistManagerDialog(unittest.TestCase):
             session=self.mock_session,
             threadpool=self.threadpool,
         )
+
+        # Mock playlist object
+        mock_playlist = Mock()
+        mock_playlist.id = "playlist_2"
+        self.mock_session.playlist.return_value = mock_playlist
 
         # Mock failed API response
         mock_response = Mock()
@@ -511,17 +528,21 @@ class TestPlaylistManagerDialog(unittest.TestCase):
             threadpool=self.threadpool,
         )
 
-        # Mock successful API responses
-        mock_items_response = Mock()
-        mock_items_response.json.return_value = {
-            "items": [{"id": "item_uuid_1", "item": {"id": "track_uuid_1"}}],
-            "totalNumberOfItems": 1,
-        }
+        # Mock playlist object and its methods for remove_track_from_playlist
+        mock_playlist = Mock()
+        mock_playlist.id = "playlist_1"
+        mock_playlist._items = None
 
-        mock_delete_response = Mock()
-        mock_delete_response.raise_for_status = Mock()
+        # Mock playlist.items() to return a track
+        mock_track_item = Mock()
+        mock_track_item.id = "track_uuid_1"
+        mock_playlist.items = Mock(return_value=[mock_track_item])
 
-        self.mock_session.request.side_effect = [mock_items_response, mock_delete_response]
+        # Mock remove_by_index
+        mock_playlist.remove_by_index = Mock()
+
+        # Mock session.playlist() to return our mock playlist
+        self.mock_session.playlist.return_value = mock_playlist
 
         # Create checkbox mock
         mock_checkbox = Mock()
@@ -537,6 +558,10 @@ class TestPlaylistManagerDialog(unittest.TestCase):
 
         # Checkbox should be re-enabled
         mock_checkbox.setEnabled.assert_called_with(True)
+
+        # Verify playlist methods were called
+        self.mock_session.playlist.assert_called_once_with("playlist_1")
+        mock_playlist.remove_by_index.assert_called_once_with(0)
 
 
 if __name__ == "__main__":

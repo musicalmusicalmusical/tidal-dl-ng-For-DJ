@@ -25,7 +25,7 @@ class GuiPlaylistManager:
 
     def __init__(self, main_window: "MainWindow"):
         """Initialize the playlist manager."""
-        self.main_window: "MainWindow" = main_window
+        self.main_window: MainWindow = main_window
         self.settings = main_window.settings
 
     def init_ui(self):

@@ -29,7 +29,7 @@ class GuiQueueManager:
 
     def __init__(self, main_window: "MainWindow"):
         """Initialize the queue manager."""
-        self.main_window: "MainWindow" = main_window
+        self.main_window: MainWindow = main_window
         self.settings: Settings = main_window.settings
 
     def init_ui(self):
